@@ -16,6 +16,9 @@ const routes = [
 
 const App = () => {
   const mountRef = useRef(null);
+  const [mouseDown, setMouseDown] = useState(false);
+  const [RGB, setRGB] = useState([0, 0, 0]);
+
   const [sizes, setSizes] = useState({
     width: window.innerWidth,
     height: window.innerHeight,
@@ -105,7 +108,43 @@ const App = () => {
         mountRefCurrent.removeChild(renderer.domElement);
       };
     }
-  }, [sizes, timeline]);
+  }, [sizes]);
+
+  useEffect(() => {
+    const handleMouseDown = () => {
+      setMouseDown(true);
+      console.log("Mouse Down: ", mouseDown);
+    };
+
+    const handleMouseUp = () => {
+      setMouseDown(false);
+      console.log("Mouse Down: ", mouseDown);
+    };
+
+    const handleColorChange = (e) => {
+      if (mouseDown) {
+        let normalizedY = e.pageY / sizes.height;
+        let normalizedX = e.pageX / sizes.width;
+        let normalizedZ = normalizedY * normalizedX;
+        setRGB([
+          Math.round(normalizedX * 255),
+          Math.round(normalizedY * 255),
+          Math.round(normalizedZ * 255),
+        ]);
+        console.log(RGB);
+      }
+    };
+
+    window.addEventListener("mousedown", handleMouseDown);
+    window.addEventListener("mouseup", handleMouseUp);
+    window.addEventListener("mousemove", handleColorChange);
+
+    return () => {
+      window.removeEventListener("mousedown", handleMouseDown);
+      window.removeEventListener("mouseup", handleMouseUp);
+      window.removeEventListener("mousemove", handleColorChange);
+    };
+  }, [mouseDown, RGB, sizes]);
 
   return (
     <main>
