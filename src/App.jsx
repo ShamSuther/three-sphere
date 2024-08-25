@@ -16,6 +16,7 @@ const routes = [
 
 const App = () => {
   const mountRef = useRef(null);
+  const meshRef = useRef(null);
   const [mouseDown, setMouseDown] = useState(false);
   const [RGB, setRGB] = useState([0, 0, 0]);
 
@@ -45,10 +46,14 @@ const App = () => {
 
       // Add 3D object
       const sphereGeometry = new THREE.SphereGeometry(3, 64, 64);
-      const material = new THREE.MeshStandardMaterial({ color: "#00ff83" });
-      const mesh = new THREE.Mesh(sphereGeometry, material);
+      const material = new THREE.MeshStandardMaterial({
+        color: "#00ff83",
+        roughness: 0.5,
+        metalness: 0.15,
+      });
+      meshRef.current = new THREE.Mesh(sphereGeometry, material);
 
-      scene.add(mesh);
+      scene.add(meshRef.current);
 
       // Add light
       const light = new THREE.PointLight(0xffffff, 100, 100);
@@ -93,7 +98,11 @@ const App = () => {
       // GSAP Animation
 
       timeline
-        .fromTo(mesh.scale, { z: 0, x: 0, y: 0 }, { z: 1, x: 1, y: 1 })
+        .fromTo(
+          meshRef.current.scale,
+          { z: 0, x: 0, y: 0 },
+          { z: 1, x: 1, y: 1 }
+        )
         .fromTo("nav", { opacity: 0 }, { opacity: 1 })
         .fromTo(
           ".list-item",
@@ -113,12 +122,12 @@ const App = () => {
   useEffect(() => {
     const handleMouseDown = () => {
       setMouseDown(true);
-      console.log("Mouse Down: ", mouseDown);
+      // console.log("Mouse Down: ", mouseDown);
     };
 
     const handleMouseUp = () => {
       setMouseDown(false);
-      console.log("Mouse Down: ", mouseDown);
+      // console.log("Mouse Down: ", mouseDown);
     };
 
     const handleColorChange = (e) => {
@@ -131,7 +140,15 @@ const App = () => {
           Math.round(normalizedY * 255),
           Math.round(normalizedZ * 255),
         ]);
-        console.log(RGB);
+
+        // changing the color
+
+        let newColor = new THREE.Color(`rgb(${RGB.join(",")})`);
+        gsap.to(meshRef.current.material.color, {
+          r: newColor.r,
+          g: newColor.g,
+          b: newColor.b,
+        });
       }
     };
 
